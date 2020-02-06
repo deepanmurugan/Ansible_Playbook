@@ -58,65 +58,8 @@ rabbitmq_plugins:
   - rabbitmq_web_dispatch
 
 # Route53 variables
-aws_access: AKIAINM3XX3O7NYCPA5A
-aws_secret: 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
-aws_zone: internal.deepan.com
-aws_zone_id: Z09999222O1EOJ59TN4XI
-aws_record: rmq.internal.deepan.com
+aws_access: ACCESSKEY 
+aws_secret: SECRETKEY
+aws_zone: internal.domainname.com
+aws_record: rmq.internal.domainname.com
 aws_ttl: 120
-
-# Consul variables
-consul_release_version: 0.8.0
-consul_datacentre: stage-mgmt
-consul_domain: aa
-consul_data_dir: /opt/wapp/consul/data
-consul_working_dir: /opt/wapp/consul
-consul_config_dir: /opt/wapp/consul/conf
-consul_master: consul-mgmt.internal.xxx.xxx.net
-consul_fqdn_name: stage-mgmt.aa
-consul_log_level: INFO
-consul_encrypt: xxxxxxxxxxxxxxx
-
-# Supervisor variables
-supervisor_installation: yes
-supervisor_config_dir: /opt/wapp/supervisor/conf.d
-supervisor_appscript_dir: /opt/wapp/supervisor/app-startscripts
-supervisor_script_dir: /opt/wapp/scripts
-supervisor_default_conf_dir: /etc/supervisor
-supervisor_conf_dir: /opt/wapp/supervisor/conf.d/*.conf
-primary_region: useast1
-secondary_region: uswest1
-
-# Sendgrid details
-sendgrid_api: CK_A
-sendgrid_from: no-reply@com
-sendgrid_to: devops@com
-sendgrid_env: Staging
-sendgrid_mail_body: |
-  <!DOCTYPE html>
-                          <html>
-                          <head>
-                              <meta content="width=device-width" name="viewport">
-                              <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-                          </head>
-                          <body>
-                              <div class='container' style="background-color:white;width:100%;height:100%">
-                                  <div class= "imgclass" style="padding-left:10%;">
-                                      <span>
-                                          <img src="foBX8C29EeWAYwKa6tRiYw_email" style="padding-top:16px; width:20%; float:unset">
-                                      <span>
-                                  </div>
-                                  <div style="padding-left:10%; padding-right:10%; padding-top:2%;">
-                                      <div class="content" style="border:2px solid #adadad; border-radius:5px; padding-left:5%; padding-right:5%; padding-top:2%; padding-bottom:2% ">
-                                          <span>
-                                                  <h2>RabbitMQ Failover Event Occured for Staging Management</h2>
-                                                  <p> Event details below:</p>
-
-
-  ops_email_body_template_tail=</span>
-                                  </div>
-                                  </div>
-                                  </div>
-                                  </body>
-                                  </html>
-
