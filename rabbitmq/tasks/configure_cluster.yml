@@ -1,0 +1,75 @@
+- name: Rabbitmq_clustering | Capturing Erlang Cookie On Master
+  command: "cat /var/lib/rabbitmq/.erlang.cookie"
+  become: true
+  register: "rabbitmq_erlang_cookie"
+  when: cluster_machine == "master"
+
+- name: Rabbitmq_clustering | Setting Erlang Cookie Of Master on Non-Master
+  set_fact:
+    rabbitmq_erlang_cookie: "{{ hostvars[master]['rabbitmq_erlang_cookie']['stdout'] }}"
+  when: cluster_machine != "master"
+
+- name: Rabbitmq_clustering | copy erlang cookie
+  template:
+    src: erlang.cookie.j2
+    dest: "{{ rabbitmq_erlang_cookie_file }}"
+    owner: rabbitmq
+    group: rabbitmq
+    mode: 0400
+    backup: yes
+  when: cluster_machine != "master"
+
+- name: Rabbitmq_clustering | Restart rabbitmq server
+  service:
+    name: rabbitmq-server
+    state: restarted
+  when: cluster_machine == "master"
+
+- name: Rabbitmq_clustering | Start rabbitmq app
+  shell: rabbitmqctl start_app
+  when: cluster_machine == "master"
+
+- name: Rabbitmq_clustering | Stop rabbitmq slave server
+  service:
+    name: rabbitmq-server
+    state: restarted 
+  when: cluster_machine != "master"
+
+- name: Rabbitmq_clustering | Stop rabbitmq app
+  shell: rabbitmqctl stop_app
+  when: cluster_machine != "master"
+
+- name: Rabbitmq_clustering | sending sigterm to any running rabbitmq processes
+  shell: pkill -u rabbitmq || true
+  when: cluster_machine != "master" 
+
+- name: Rabbitmq_clustering | restarting rabbitmq-server
+  service:
+    name: rabbitmq-server
+    state: restarted
+  when: cluster_machine != "master"
+
+- name: Rabbitmq_clustering | stopping rabbitmq app
+  command: rabbitmqctl stop_app
+  when: cluster_machine != "master"
+
+- name: Rabbitmq_clustering | Pausing few seconds for clean stopping
+  pause:
+    seconds: 10
+    
+- name: Rabbitmq_clustering | resetting rabbitmq app
+  command: rabbitmqctl reset
+  when: cluster_machine != "master" 
+
+- name: Rabbitmq_clustering | joining rabbitmq cluster
+  command: rabbitmqctl join_cluster "rabbit@{{ hostvars[master]['ansible_hostname'] }}"
+  register: cluster_joined
+  when: cluster_machine != "master"
+
+- name: Rabbitmq_clustering | Start rabbitmq app
+  shell: rabbitmqctl start_app
+  when: cluster_machine != "master"
+
+- name: Rabbitmq_clustering | Set cluster name
+  command: rabbitmqctl set_cluster_name "{{ cluster_name }}" 
+  when: cluster_machine == "master"

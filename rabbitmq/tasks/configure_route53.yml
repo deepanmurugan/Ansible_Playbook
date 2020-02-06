@@ -1,0 +1,26 @@
+- name: Configure Route53 | Install boto3
+  apt:
+    pkg:
+    - python-pip
+
+- name: Configure Route53 | Install boto3
+  pip:
+    name:
+    - boto3
+    - botocore
+    - boto
+
+- name: Configure Route53 | Update DNS in AWS Route53
+  route53:
+    aws_access_key: "{{ aws_access }}" 
+    aws_secret_key: "{{ aws_secret }}" 
+    state: present
+    zone: "{{ aws_zone }}"
+    record: "{{ aws_record }}"
+    type: A
+    ttl: "{{ aws_ttl }}" 
+    value: "{{ hostvars[master]['ansible_default_ipv4']['address'] }}"
+    private_zone: True
+    overwrite: yes
+    wait: yes
+  when: cluster_machine == "master"

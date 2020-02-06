@@ -1,0 +1,23 @@
+---
+# tasks file for role: rabbitmq
+
+- include: install_rmq.yml
+
+- include: rabbitmq_conf.yml
+
+- include: configure_cluster.yml
+  when: rabbitmq_enable_cluster is defined
+
+- include: rabbitmq_users.yml
+  when: rabbitmq_users is defined
+
+- include: configure_plugins.yml
+  when: rabbitmq_plugins is defined
+
+- include: configure_queue.yml 
+  when: >
+        rabbitmq_config is defined and
+        rabbitmq_enable_cluster is defined
+
+- include: configure_route53.yml
+  when: aws_record is defined

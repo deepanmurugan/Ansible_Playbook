@@ -1,0 +1,8 @@
+# Copy rabbitmq.conf file in all servers
+- name: Configure RabbitMQ | Create rabbitmq.conf and copy to destination
+  template:
+    src: templates/rabbitmq.conf.j2
+    dest: "{{ rmq_conf_dir }}" 
+    owner: root
+    group: root
+    mode: '0644'

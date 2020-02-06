@@ -1,0 +1,15 @@
+- name:  Configure RabbitMQ Plugins | Enables the rabbitmq_management plugin
+  rabbitmq_plugin:
+    names={{ rabbitmq_plugins | join(',') }}
+
+- name: Configure RabbitMQ Plugins | Restart rabbitmq
+  service:
+    name: rabbitmq-server
+    state: restarted
+
+- name: Configure RabbitMQ Plugins | Pause few seconds for rmq server start
+  pause:
+    seconds: 20 
+
+- name: Configure RabbitMQ Plugins | Start rabbitmq app
+  shell: rabbitmqctl start_app

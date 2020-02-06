@@ -1,0 +1,57 @@
+- name: Install rmq | set fact for deciding the master server
+  set_fact: 
+    cluster_machine="master"
+    node_name="node1"
+  when: ( ansible_play_hosts | sort | first ) == inventory_hostname
+
+- name: Install rmq | set fact for deciding the slave server
+  set_fact: 
+    cluster_machine="slave"
+    node_name=node{{ ansible_play_hosts.index(inventory_hostname)+2 }}
+  when: ( ansible_play_hosts | sort | first ) != inventory_hostname
+
+- name: Install rmq | update all packages
+  apt:
+    update_cache: yes
+    upgrade: 'yes'
+
+- name: Install rmq | Install curl gnupg and jq
+  apt:
+    pkg:
+    - curl
+    - gnupg
+    - jq
+
+- name: Install rmq | Add signing keys to ubuntu
+  apt_key:
+    url: "{{ signing_keys }}" 
+    state: present
+
+- name: Install rmq | Add new repo
+  template:
+    src: templates/sources.list.j2
+    dest: "{{ repo_dir }}" 
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Install rmq | Update all packages
+  apt:
+    update_cache: yes
+    upgrade: 'yes'
+
+- name: Install rmq | Install rabbitmq-server
+  apt:
+    name: rabbitmq-server
+    state: present
+
+- name: Install rmq | Enable rabbitmq service
+  service:
+    name: rabbitmq-server
+    enabled: yes
+
+- name: Install rmq | Verify rabbitmq-server installation
+  shell: rabbitmqctl --version
+  register: rmq_version
+
+- debug: msg="RabbitMQ Version {{ rmq_version.stdout }}"
