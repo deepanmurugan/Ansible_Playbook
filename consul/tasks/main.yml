@@ -1,0 +1,25 @@
+---
+# tasks file for consul
+
+- include: check_consul.yml
+  tags:
+    - check_consul
+
+- include: install_consul.yml
+  when: consul_installed_version.rc != 0 or consul_force_upgrade or consul_version not in consul_installed_version.stdout
+  tags:
+    - install_consul
+
+- include: configure_consul.yml
+  when: consul_installation
+  tags:
+    - configure_consul
+
+- include: consul_service.yml
+  tags:
+    - consul_service
+
+- include: register_new_service.yml
+  when: consul_service_register is defined
+  tags:
+    - register_consul_service

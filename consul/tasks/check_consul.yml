@@ -1,0 +1,12 @@
+# Check if consul is already installed or not
+
+- name: Check Consul | Check if consul is installed
+  command: consul --version
+  changed_when: false
+  ignore_errors: true
+  register: consul_installed_version
+  check_mode: no
+
+- name: Check Consul | Set the installed version to a variable
+  set_fact:
+    consul_installed_version = "{{ consul_installed_version }}"

@@ -1,0 +1,44 @@
+---
+# defaults file for consul
+
+# Consul Installation variables
+consul_dependencies:
+  - unzip
+  - python-pip
+
+consul_python_dependency:
+  - python-consul
+
+consul_release_version: 1.6.1
+consul_force_upgrade: true
+consul_download_url: https://releases.hashicorp.com/consul/{{ consul_release_version }}/consul_{{ consul_release_version }}_linux_amd64.zip
+consul_binary_dir: /opt/consul
+consul_conf_dir: /opt/consul/conf
+consul_data_dir: /opt/consul/data
+consul_log_dir: /var/log/consul
+system_bin_directory: /usr/bin/consul
+consul_user: consul
+consul_group: consul
+
+
+# Consul Config variables
+consul_ui: false
+consul_server: false
+consul_log_level: INFO
+consul_domain: test.mydomain.com
+consul_datacenter: dc1
+consul_ip: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+consul_http_port: 8500
+consul_dns_port: 8600
+consul_syslog: false
+consul_nodename: "{{ ansible_nodename }}"
+consul_enable_script_check: false
+consul_server_node: 
+  - 172.31.42.29
+
+# Consul register new services
+#consul_service_register:
+#  - name: "nginx service register"
+#    port: 80
+#    http: "http://localhost:80"
+#    interval: "60s"

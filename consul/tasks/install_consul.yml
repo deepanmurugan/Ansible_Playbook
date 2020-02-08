@@ -1,0 +1,55 @@
+# Install Consul Version
+
+- name: Install Consul | Install consul dependent libraries
+  apt:
+    pkg: "{{ consul_dependencies }}"
+    update_cache: true
+
+- name: Install Consul | Install Consul python dependencies
+  pip:
+    name: "{{ consul_python_dependency }}"
+
+- name: Install Consul | Create new group for consul
+  group:
+    name: "{{ consul_group}}"
+    state: present
+  when: consul_group is defined
+
+- name: Install Consul | Create new user for consul
+  user:
+    name: "{{ consul_user }}"
+    comment: consul service user
+    uid: 1100
+    group: "{{ consul_group }}"
+  when: consul_user is defined
+
+- name: Install Consul | Make directories for consul
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ consul_user }}"
+    group: "{{ consul_group }}"
+  with_items:
+    - "{{ consul_binary_dir }}"
+    - "{{ consul_conf_dir }}"
+    - "{{ consul_data_dir }}"
+    - "{{ consul_log_dir }}"
+
+- name: Install Consul | Download consul binary
+  unarchive:
+    src: "{{ consul_download_url }}"
+    dest: "{{ consul_binary_dir }}"
+    owner: "{{ consul_user }}"
+    group: "{{ consul_group }}"
+    remote_src: yes
+  notify: restart consul server
+
+- name: Install Consul | Link consul to system bin directory
+  file:
+    src: "{{ consul_binary_dir }}/consul"
+    dest: "{{ system_bin_directory }}"
+    state: link
+
+- name: Set consul installation fact
+  set_fact:
+    consul_installation: true

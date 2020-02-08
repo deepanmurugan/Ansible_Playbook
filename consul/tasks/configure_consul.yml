@@ -1,0 +1,19 @@
+# Configue consul
+
+- name: Configure Consul | Create consul config file
+  template:
+    src: templates/consul_conf.j2
+    dest: "{{ consul_conf_dir }}/consul.json"
+    owner: "{{ consul_user }}"
+    group: "{{ consul_group }}"
+  notify: restart consul server
+
+- name: Configure Consul | Create consul.service file
+  template:
+    src: templates/consul_service.j2
+    dest: /etc/systemd/system/consul.service
+    trim_blocks: false
+    mode: 0644
+    owner: root
+    group: root
+  notify: restart consul server

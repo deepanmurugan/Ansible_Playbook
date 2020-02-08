@@ -1,0 +1,14 @@
+---
+- name: Consul Register Service | Register new services
+  consul:
+    service_name: "{{ item.name }}"
+    service_port: "{{ item.port | default (omit) }}"
+    service_address: "{{ item.service_address | default (omit) }}"
+    http: "{{ item.http | default (omit) }}"
+    script: "{{ item.script | default (omit) }}"
+    interval: "{{ item.interval | default (omit) }}"
+    tags: "{{ item.tags | default (omit) }}"
+  notify: restart consul server
+  changed_when: false
+  with_items:
+    - "{{ consul_service_register }}"
