@@ -1,0 +1,6 @@
+
+- name: Install common packages
+  package:
+    name: "{{ item }}"
+  with_items:
+    - "{{ common_packages }}"

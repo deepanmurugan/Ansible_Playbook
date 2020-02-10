@@ -1,0 +1,14 @@
+- name: Install Ansible | Install the repository with ansible package
+  apt_repository:
+    repo: "{{ ansible_repo }}"
+    state: present
+
+- name: Install Ansible | Update apt
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install Ansible | Finally Install ansible package
+  package:
+    name: "{{ ansible_package_name }}"
+    state: present

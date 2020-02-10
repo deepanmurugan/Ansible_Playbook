@@ -1,0 +1,6 @@
+- name: Output Ansible | Check ansible Installation
+  command: ansible --version
+  register: ansible_installed_version
+
+- name: Output Ansible | Print ansible version always
+  debug: msg="Installed Ansible Version {{ ansible_installed_version.stdout }}"

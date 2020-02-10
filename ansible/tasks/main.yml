@@ -1,0 +1,21 @@
+---
+# tasks file for ansible
+
+- name: Install common packages
+  include: install_common.yml
+  tags:
+    - install_common
+
+- name: Check Ansible Installation
+  include: check_ansible.yml
+  tags:
+    - check_ansible
+
+- name: Install Ansible
+  include: install_ansible.yml
+  when: ansible_installed_version.rc != 0 or ansible_force_install
+  tags:
+    - install_ansible
+
+- name: Output Ansible Version
+  include: output_ansible.yml

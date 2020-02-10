@@ -1,0 +1,11 @@
+---
+# defaults file for  role: ansible
+
+# Common package variables
+common_packages:
+  - software-properties-common
+
+# Ansible package variables
+ansible_repo: "ppa:ansible/ansible"
+ansible_package_name: ansible
+ansible_force_install: false

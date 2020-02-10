@@ -1,0 +1,12 @@
+
+- name: Check ansible | Check if ansible is installed
+  command: ansible --version
+  changed_when: false
+  ignore_errors: true
+  register: ansible_installed_version
+  check_mode: no
+
+- name: Check ansible | Set the installed version to a variable
+  set_fact:
+    ansible_installed_version = "{{ ansible_installed_version }}"
+  notify: output ansible
