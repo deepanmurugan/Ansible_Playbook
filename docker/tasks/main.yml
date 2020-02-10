@@ -1,0 +1,13 @@
+---
+# tasks file for docker
+
+- name: Install common packages
+  include: install_common.yml
+  tags:
+    - common_install
+
+- name: Install Docker and Docker compose
+  include: install_docker.yml
+  notify: restart docker
+  tags:
+    - docker_install

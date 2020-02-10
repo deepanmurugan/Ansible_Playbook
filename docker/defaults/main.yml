@@ -1,0 +1,16 @@
+---
+# defaults file for docker
+
+common_packages:
+  - linux-image-extra-virtual
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - software-properties-common
+
+
+docker_packages:
+  - docker-ce
+  - docker-compose
+
+system_user: docker

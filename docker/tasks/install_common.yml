@@ -1,0 +1,6 @@
+- name: Install common | Install supporting packages
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ common_packages }}"
