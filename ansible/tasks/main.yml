@@ -19,3 +19,5 @@
 
 - name: Output Ansible Version
   include: output_ansible.yml
+  tags:
+    - output_ansible
