@@ -1,0 +1,12 @@
+---
+# tasks file for nodejs
+
+- name: Install dependencies
+  include: install_common.yml
+  tags:
+    - install_common
+
+- name: Install nodejs
+  include: install_nodejs.yml
+  tags:
+    - install_nodejs

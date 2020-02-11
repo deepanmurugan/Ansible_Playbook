@@ -1,0 +1,10 @@
+---
+# defaults file for nodejs
+
+common_packages:
+  - curl
+  - build-essential
+
+nodejs_package:
+  - nodejs
+  - npm

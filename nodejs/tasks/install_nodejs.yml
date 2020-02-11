@@ -1,0 +1,10 @@
+
+- name: Install nodejs | Install nodejs and npm
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ nodejs_package }}"
+
+- name: Install nodejs | Install npm globally
+  command: npm install npm --global
