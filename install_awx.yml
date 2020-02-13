@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: true
+
+  roles:
+    - ansible
+    - docker
+    - nodejs
+    - ansible_awx
+

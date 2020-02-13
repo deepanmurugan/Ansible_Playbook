@@ -1,0 +1,36 @@
+---
+# tasks file for ansible_awx
+
+- name: Install AWX | Install docker-py using pip
+  pip:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ pip_packages }}"
+
+- name: Install AWX | Create AWX installation directory
+  file:
+    path: "{{ awx_installation_path }}"
+    state: directory
+    mode: 0755
+
+- name: Install AWX | Download AWX from git
+  git:
+    repo: "{{ awx_git_path }}"
+    dest: "{{ awx_installation_path }}"
+    version: "{{ awx_version }}"
+    update: "{{ awx_keep_updated }}"
+    force: true
+    accept_hostkey: true
+
+- name: Install AWX | Run AWX Installation Playbook
+  command: "ansible-playbook -i inventory install.yml -e postgres_data_dir={{ postgres_data_dir }}"
+  args:
+    chdir: "{{ awx_installation_path }}/installer"
+    creates: "{{ awx_installation_path }}/aux_installed"
+
+- name: Install AWX | Create AUX Installation confirmation file
+  file:
+    path: "{{ awx_installation_path }}/aux_installed"
+    state: touch
+  changed_when: false

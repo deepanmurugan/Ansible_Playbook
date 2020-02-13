@@ -1,0 +1,12 @@
+---
+# tasks file for ansible_awx
+
+- name: Install Commom packages or dependencies
+  include: install_common.yml
+  tags:
+    - install_common
+
+- name: Install Ansible AWX
+  include_tasks: install_awx.yml
+  tags:
+    - install_awx
