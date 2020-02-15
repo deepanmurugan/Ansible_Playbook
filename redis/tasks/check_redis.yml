@@ -1,0 +1,11 @@
+
+- name: Check redis | Check if redis is installed
+  command: redis --version
+  changed_when: false
+  ignore_errors: true
+  register: redis_installed_version
+  check_mode: no
+
+- name: Check redis | Set the installed version to a variable
+  set_fact:
+    redis_installed_version = "{{ redis_installed_version }}"

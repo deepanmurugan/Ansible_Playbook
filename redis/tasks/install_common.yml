@@ -1,0 +1,8 @@
+---
+# tasks file for redis
+
+- name: Install common packages
+  package:
+    name: "{{ item }}"
+  with_items:
+    - "{{ common_packages }}"

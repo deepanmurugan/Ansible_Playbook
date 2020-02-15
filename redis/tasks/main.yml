@@ -1,0 +1,16 @@
+
+- name: Install common packages
+  include: install_common.yml
+  tags:
+    - install_common
+
+- name: Check redis installation
+  include: check_redis.yml
+  tags:
+    - check_redis
+
+- name: Install and configure redis
+  include: install_redis.yml
+  when: redis_installed_version.rc != 0
+  tags:
+    - install_common

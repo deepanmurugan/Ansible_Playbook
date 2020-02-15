@@ -1,0 +1,18 @@
+
+- name: Install Redis | Finally Install redis package
+  package:
+    name: "{{ redis_package_name }}"
+    state: present
+
+- name: Install Redis | Configure redis
+  template:
+    src: redis.conf.j2
+    dest: "{{ redis_conf_path }}"
+    mode: 0644
+  notify: restart redis
+
+- name: Install Redis | Ensure Redis is running and enabled on boot
+  service: 
+    name: redis 
+    state: started 
+    enabled: yes
