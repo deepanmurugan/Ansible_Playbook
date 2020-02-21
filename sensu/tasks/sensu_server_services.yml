@@ -1,0 +1,27 @@
+- name: Configure services | Pausing few seconds
+  pause:
+    seconds: 30
+
+- name: Configure services | Configure sensu-server as a service
+  command: sudo update-rc.d sensu-server enable
+  ignore_errors: True
+
+- name: Configure services | Pausing few seconds
+  pause:
+    seconds: 30
+
+- name: Configure services | Configure uchiwa as a service
+  command: sudo update-rc.d uchiwa default
+  ignore_errors: True
+
+- name: Configure services | Pausing few seconds
+  pause:
+    seconds: 30
+
+- name: Configure services | Configure sensu-api as a service
+  command: sudo update-rc.d sensu-api enable
+  ignore_errors: True
+
+- name: Configure services | Pausing few seconds
+  pause:
+    seconds: 30

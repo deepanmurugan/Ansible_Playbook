@@ -1,0 +1,28 @@
+- name: Configure dasshboard | Add signing keys
+  apt_key:
+    url: "{{ signing_keys }}" 
+    state: present
+
+- name: Configure dashobard | Add repository
+  apt_repository:
+    repo: "{{ sensu_reponame }}"
+    state: present
+    filename: "{{ sensu_repo_filename }}" 
+
+- name: Configure dashobard | Install uchiwa
+  package:
+    name: "{{ sensu_dashboard_package }}"
+    state: present
+
+- name: Configure dashobard | Deploy Uchiwa config
+  template:
+    src: uchiwa_config.json.j2
+    dest: "{{ sensu_config_path }}/uchiwa.json"
+    owner: "{{ sensu_user_name }}"
+    group: "{{ sensu_group_name }}"
+    mode: 0644
+  notify: restart uchiwa service
+
+- name: Configure dashobard | Pause for few seconds
+  pause:
+    seconds: 10

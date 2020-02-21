@@ -1,0 +1,7 @@
+
+- name: Install common | Install common dependencies
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ common_packages }}"

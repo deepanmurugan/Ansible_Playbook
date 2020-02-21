@@ -1,0 +1,33 @@
+---
+# handlers file for sensu
+
+- name: restart rabbitmq service
+  service:
+    name: "{{ sensu_rabbitmq_service_name }}"
+    state: restarted
+
+- name: restart redis service
+  service:
+    name: "{{ sensu_redis_service_name }}"
+    pattern: /usr/bin/redis-server
+    state: restarted
+
+- name: restart uchiwa service
+  service:
+    name: "{{ uchiwa_service_name }}"
+    state: restarted
+
+- name: restart sensu-server service
+  service:
+    name: "{{ sensu_server_service_name }}"
+    state: restarted
+
+- name: restart sensu-api service
+  service:
+    name: "{{ sensu_api_service_name }}"
+    state: restarted
+
+- name: restart sensu-client service
+  service:
+    name: "{{ sensu_client_service_name }}"
+    state: restarted

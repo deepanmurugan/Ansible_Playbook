@@ -1,0 +1,73 @@
+- name: Configure sensu | Add signing keys
+  apt_key:
+    url: "{{ signing_keys }}" 
+    state: present
+
+- name: Configure sensu | Add repository
+  apt_repository:
+    repo: deb https://sensu.global.ssl.fastly.net/apt sensu main
+    state: present
+    filename: /etc/apt/sources.list.d/sensu.list
+
+- name: Configure sensu | Update all packages
+  apt:
+    update_cache: yes
+    upgrade: 'yes'
+
+- name: Configure sensu | Create new group for sensu 
+  group:
+    name: "{{ sensu_group_name }}"
+    state: present
+  when: sensu_group_name is defined
+
+- name: Configure sensu | Create new user for sensu
+  user:
+    name: "{{ sensu_user_name }}"
+    comment: sensu service user
+    uid: 1200
+    group: "{{ sensu_group_name }}"
+  when: sensu_user_name is defined
+
+- name: Configure sensu | Create sensu config folder
+  file:
+    dest: "{{ sensu_config_path }}/conf.d"
+    state: directory
+    owner: "{{ sensu_user_name }}"
+    group: "{{ sensu_group_name }}"
+    mode: "0555"
+
+- name: Configure sensu | Deploy redis configuration
+  template:
+    src: "{{ sensu_redis_config }}"
+    dest: "{{ sensu_config_path }}/conf.d/redis.json"
+    owner: "{{ sensu_user_name }}"
+    group: "{{ sensu_group_name }}"
+    mode: "0640"
+  notify:
+      - restart sensu-server service
+      - restart sensu-api service
+      - restart sensu-client service
+
+- name: Configure sensu | Deploy rabbitmq configuration
+  template:
+    src: "{{ sensu_rabbitmq_config }}"
+    dest: "{{ sensu_config_path }}/conf.d/rabbitmq.json"
+    owner: "{{ sensu_user_name }}"
+    group: "{{ sensu_group_name }}"
+    mode: "0640"
+  notify:
+      - restart sensu-server service
+      - restart sensu-api service
+      - restart sensu-client service
+
+- name: Configure sensu | Deploy Sensu transport configuration
+  template:
+    src: "{{ sensu_transport_config }}"
+    dest: "{{ sensu_config_path }}/conf.d/transport.json"
+    owner: "{{ sensu_user_name }}"
+    group: "{{ sensu_group_name }}"
+    mode: "0640"
+  notify:
+      - restart sensu-server service
+      - restart sensu-api service
+      - restart sensu-client service

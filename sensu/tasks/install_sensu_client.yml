@@ -1,0 +1,20 @@
+
+- name: Install sensu-client | Deploy Sensu client service configuration
+  template:
+    src: "{{ sensu_client_config  }}"
+    dest: "{{ sensu_config_path }}/conf.d/client.json"
+    owner: "{{ sensu_user_name }}"
+    group: "{{ sensu_group_name }}"
+    mode: "0640"
+  notify: restart sensu-client service
+
+- name: Install sensu | Install sensu-client
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ sensu_packages }}"
+
+- name: Install sensu-client | Pause for few seconds
+  pause:
+    seconds: 10

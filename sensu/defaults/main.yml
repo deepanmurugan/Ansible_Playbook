@@ -1,0 +1,83 @@
+---
+# Sensu dependent packages
+common_packages:
+  - apt-transport-https
+  - gnupg
+
+# Sensu installation variables
+signing_keys: https://sensu.global.ssl.fastly.net/apt/pubkey.gpg
+sensu_config_path: /etc/sensu
+sensu_packages:
+  - sensu
+sensu_reponame: deb https://sensu.global.ssl.fastly.net/apt sensu main
+sensu_repo_filename: /etc/apt/sources.list.d/sensu.list
+sensu_user_name: sensu
+sensu_group_name: sensu
+
+# Sensu redis configuration
+sensu_redis_config: sensu-redis.json.j2
+sensu_redis_password:
+sensu_redis_sentinels: []
+sensu_redis_master_name:
+sensu_redis_host: 127.0.0.1
+sensu_redis_port: 6379
+
+# Sensu rabbitmq configuration
+sensu_rabbitmq_config: sensu-rabbitmq.json.j2
+sensu_rabbitmq_enable_ssl: false
+sensu_rabbitmq_host: "{{ ansible_play_hosts | sort | first }}" 
+sensu_rabbitmq_port: 5672
+sensu_rabbitmq_vhost: /
+sensu_rabbitmq_user_name: sensu
+sensu_rabbitmq_password: sensu
+
+# Sensu transport configuration
+sensu_transport_config: sensu-transport.json.j2 
+sensu_transport: rabbitmq
+
+# Sensu api configuration
+sensu_api_config: sensu-api.json.j2
+sensu_api_hostname: localhost
+sensu_api_binding: 0.0.0.0
+sensu_api_port: 4567
+sensu_api_uchiwa_path: ''
+sensu_api_host: localhost
+sensu_api_ssl: "false"
+sensu_api_user_name: admin
+sensu_api_password: admin
+sensu_api_timeout: 100
+
+# Sensu uchiwa configuration
+sensu_dashboard_package: uchiwa
+sensu_uchiwa_dc_name: sensu_dc
+sensu_uchiwa_path: /opt/uchiwa
+sensu_uchiwa_api_port: 4567
+sensu_uchiwa_users:
+  - username: admin
+    password: admin
+sensu_uchiwa_port: 3000
+sensu_uchiwa_auth_privatekey: false
+sensu_uchiwa_refresh: 100
+
+# Sensu client configuration
+sensu_client_service_name: sensu-client
+sensu_client_name: "{{ ansible_hostname }}"
+sensu_client_subscriptions: 
+  - dev
+  - test
+sensu_client_keepalive_handlers:
+  - default
+sensu_client_keepalive_threshold_warning: 120
+sensu_client_keepalive_threshold_critical: 180
+sensu_client_environment: management
+sensu_client_bindip: 127.0.0.1
+sensu_client_bindport: 3030
+sensu_client_safe_mode: false
+sensu_client_config: client.json.j2
+
+# Sensu service names
+sensu_rabbitmq_service_name: rabbitmq-server
+sensu_redis_service_name: redis
+uchiwa_service_name: uchiwa
+sensu_server_service_name: sensu-server
+sensu_api_service_name: sensu-api

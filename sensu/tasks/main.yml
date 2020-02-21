@@ -1,0 +1,51 @@
+---
+# tasks file for sensu
+
+- name: Set fact for deciding the sensu server
+  set_fact:
+    sensu_role="server"
+
+- name: Install common packges
+  include: install_common.yml
+  tags:
+    - install_common
+
+- name: Configure sensu
+  include: configure_sensu.yml
+  tags:
+    - configure_sensu
+
+- name: Install sensu server
+  include: install_sensu.yml
+  when:
+    sensu_role == "server"
+  tags:
+    - install_sensu_server
+
+- name: Install uchiwa dashboard
+  include: install_dashboard.yml
+  when:
+    sensu_role == "server"
+  tags:
+    - install_dashboard
+
+- name: Install sensu client
+  include: install_sensu_client.yml
+  when:
+    sensu_role == "server"
+  tags:
+    - install_sensu_client
+
+- name: Configure sensu server as service
+  include: sensu_server_services.yml
+  when:
+    sensu_role == "server"
+  tags:
+    - sensu_server_service
+
+- name: Configure sensu client as service
+  include: sensu_client_services.yml
+  when:
+    sensu_role == "server"
+  tags:
+    - sensu_client_service

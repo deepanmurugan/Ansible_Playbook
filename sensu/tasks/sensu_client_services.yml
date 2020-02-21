@@ -1,0 +1,7 @@
+- name: Configure services | Pausing few seconds
+  pause:
+    seconds: 30
+
+- name: Configure services | Configure sensu-client as a service
+  command: sudo update-rc.d sensu-client enable
+  ignore_errors: True

@@ -1,0 +1,14 @@
+{
+  "redis": {
+{% if sensu_redis_password %}
+    "password": "{{ sensu_redis_password }}",
+{% endif %}
+{% if sensu_redis_sentinels %}
+    "sentinels": {{ sensu_redis_sentinels | to_nice_json }},
+    "master": "{{ sensu_redis_master_name }}"
+{% else %}
+    "host": "{{ sensu_redis_host }}",
+    "port": {{ sensu_redis_port }}
+{% endif %}
+  }
+}

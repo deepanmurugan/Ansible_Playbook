@@ -1,0 +1,31 @@
+
+- name: Install sensu server | Deploy Sensu api configuration
+  template:
+    src: "{{ sensu_rabbitmq_config }}"
+    dest: "{{ sensu_config_path }}/conf.d/rabbitmq.json"
+    owner: "{{ sensu_user_name }}"
+    group: "{{ sensu_group_name }}"
+    mode: "0640"
+  notify:
+      - restart sensu-server service
+      - restart sensu-api service
+      - restart sensu-client service
+
+- name: Install sensu server | Deploy Sensu api configuration
+  template:
+    src: "{{ sensu_api_config }}"
+    dest: "{{ sensu_config_path }}/conf.d/api.json"
+    owner: "{{ sensu_user_name }}"
+    group: "{{ sensu_group_name }}"
+    mode: "0640"
+  notify:
+      - restart sensu-server service
+      - restart sensu-api service
+      - restart sensu-client service
+
+- name: Install sensu server | Install sensu
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ sensu_packages }}"
