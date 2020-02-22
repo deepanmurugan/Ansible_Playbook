@@ -1,0 +1,22 @@
+---
+# tasks file for sensu
+
+- name: Install common packges
+  include: install_common.yml
+  tags:
+    - install_common
+
+- name: Configure sensu
+  include: configure_sensu.yml
+  tags:
+    - configure_sensu
+
+- name: Install sensu client
+  include: install_sensu_client.yml
+  tags:
+    - install_sensu_client
+
+- name: Configure sensu client as service
+  include: sensu_client_services.yml
+  tags:
+    - sensu_client_service
