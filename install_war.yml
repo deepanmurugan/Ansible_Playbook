@@ -5,6 +5,8 @@
   gather_facts: True
 
   vars:
+    war_file: samplenew.war
+    tomcat_war_path: /opt/tomcat/webapps
 
   tasks:
     - name: Deploy war | Install necessary packages if missing
@@ -21,6 +23,20 @@
     - name: Deploy war | Download war from AWS S3
       s3:
         bucket: projcts-artifacts
-        object: "{{jobname}}-{{buildno}}/jobs/{{jobname}}/{{buildno}}/samplenew.war"
-        dest: /tmp/samplenew.war
+        object: "{{jobname}}-{{buildno}}/jobs/{{jobname}}/{{buildno}}/{{war_file}}"
+        dest: "/tmp/{{war_file}}"
         mode: get
+
+    - name: Deploy war | Copy war file to tomcat webapps
+      copy:
+        src: /tmp/{{war_file}}
+        dest: "{{tomcat_war_path}}/{{war_file}}"
+        owner: tomcat
+        group: tomcat
+        mode: '0644'
+        backup: yes
+        
+    - name: Deploy war | Restart tomcat service
+      service:
+        name: tomcat
+        state: restarted
