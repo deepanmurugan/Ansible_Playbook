@@ -1,6 +1,6 @@
 - name: Install Consul | Install consul dependent libraries
   aws_s3:
     bucket: projcts-artifacts
-    object: "{{jobname}}/{{branchname}}-{{buildno}}/jobs/{{branchname}}/{{buildno}}"
+    object: "{{jobname}}-{{buildno}}/jobs/{{jobname}}/{{buildno}}"
     dest: /tmp
     mode: get
