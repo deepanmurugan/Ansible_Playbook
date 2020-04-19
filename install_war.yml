@@ -5,6 +5,7 @@
 
   vars:
     war_file: samplenew.war
+    tomcat_app: samplenew
     tomcat_war_path: /opt/tomcat/webapps
 
   tasks:
@@ -28,6 +29,9 @@
         
     - name: Deploy war | Change war permissions
       shell: chmod 777 "/tmp/{{war_file}}"
+      
+    - name: Deploy war | Remove old builds
+      shell: sudo rm -rf "{{tomcat_war_path}}/{{war_file}}" "{{tomcat_war_path}}/{{tomcat_app}}"
 
     - name: Deploy war | Copy war file to tomcat webapps
       shell: sudo cp "/tmp/{{war_file}}" "{{tomcat_war_path}}/{{war_file}}"
