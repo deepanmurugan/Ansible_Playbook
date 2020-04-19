@@ -21,6 +21,6 @@
     - name: Deploy war | Download war from AWS S3
       s3:
         bucket: projcts-artifacts
-        object: "{{jobname}}-{{buildno}}/jobs/{{jobname}}/{{buildno}}"
+        object: "{{jobname}}-{{buildno}}/jobs/{{jobname}}/{{buildno}}/samplenew.war"
         dest: /tmp
         mode: get
