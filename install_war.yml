@@ -1,5 +1,5 @@
 - name : Playbook to schedule cloudwatch script as cron
-  hosts: "{{host}}"
+  hosts: all
   user: ubuntu
   sudo: yes
   gather_facts: True
