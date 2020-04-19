@@ -7,6 +7,17 @@
   vars:
 
   tasks:
+    - name: Deploy war | Install necessary packages if missing
+      apt:
+        name: python3-pip
+        state: present
+   
+    - name: Deploy war | Install python packages
+      pip:
+        name:
+        - boto3
+        - botocore
+        
     - name: Deploy war | Download war from AWS S3
       s3:
         bucket: projcts-artifacts
