@@ -1,4 +1,4 @@
-- name : Playbook to schedule cloudwatch script as cron
+- name : Playbook to deploy war file in tomcat
   hosts: all
   user: ubuntu
   gather_facts: True
@@ -27,17 +27,14 @@
         mode: get
         
     - name: Deploy war | Change war permissions
-      shell: chmod 666 "/tmp/{{war_file}}"
+      shell: chmod 777 "/tmp/{{war_file}}"
 
     - name: Deploy war | Copy war file to tomcat webapps
-      copy:
-        src: /tmp/{{war_file}}
-        dest: "{{tomcat_war_path}}/{{war_file}}"
-        owner: tomcat
-        group: tomcat
-        mode: '0644'
-        backup: yes
+      shell: sudo cp "/tmp/{{war_file}}" "{{tomcat_war_path}}/{{war_file}}"
         
+    - name: Deploy war | Change war permissions
+      shell: chown tomcat:tomcat "{{tomcat_war_path}}/{{war_file}}"
+
     - name: Deploy war | Restart tomcat service
       service:
         name: tomcat
