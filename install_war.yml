@@ -1,6 +1,15 @@
-- name: Install Consul | Install consul dependent libraries
-  s3:
-    bucket: projcts-artifacts
-    object: "{{jobname}}-{{buildno}}/jobs/{{jobname}}/{{buildno}}"
-    dest: /tmp
-    mode: get
+- name : Playbook to schedule cloudwatch script as cron
+  hosts: "{{host}}"
+  user: ubuntu
+  sudo: yes
+  gather_facts: True
+
+  vars:
+
+  tasks:
+    - name: Deploy war | Download war from AWS S3
+      s3:
+        bucket: projcts-artifacts
+        object: "{{jobname}}-{{buildno}}/jobs/{{jobname}}/{{buildno}}"
+        dest: /tmp
+        mode: get
