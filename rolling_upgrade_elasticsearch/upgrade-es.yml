@@ -1,4 +1,5 @@
-#ansible-playbook -i "ip-address", --extra-vars "host=all user=ubuntu" upgrade_data_es.yml
+#On data nodes: ansible-playbook -i "ip-address", --extra-vars "host=all user=ubuntu" upgrade-es.yml
+#On all other nodes except data node: ansible-playbook -i "ip-address", --extra-vars "host=all user=ubuntu" upgrade-es.yml --tags "es-all-nodes"
 
 - name : Playbook to upgrade ES Nodes
   hosts: "{{host}}"
