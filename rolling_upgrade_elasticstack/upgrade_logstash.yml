@@ -1,7 +1,7 @@
 #ansible-playbook -i "ip-address", --extra-vars "host=all user=ubuntu" upgrade_logstash.yml
 
 - name : Playbook to upgrade logstash Nodes
-  hosts: "{{host}}"
+  hosts: logstash
   user: "{{user}}"
   become: yes
   serial: 1
