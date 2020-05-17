@@ -15,7 +15,7 @@ ansible-playbook -i inv main.yml
 9. Go for the next node
 ```
 
-### Steps in Upgrading Elasticsearch: upgrade_es.yml
+### Steps in Upgrading Elasticsearch: upgrade_es.yml and upgrade_es_data.yml
 ```
 1. Pre download the deb package
 2. Make sure ES version is installed in the node and the version installed is less than the one you are trying to install
