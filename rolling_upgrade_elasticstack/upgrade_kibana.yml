@@ -1,7 +1,7 @@
 #ansible-playbook -i "ip-address", --extra-vars "host=all user=ubuntu" upgrade_kibana.yml
 
 - name : Playbook to upgrade Kibana Nodes
-  hosts: "{{host}}"
+  hosts: kibana
   user: "{{user}}"
   become: yes
   serial: 1
