@@ -2,7 +2,7 @@
 
 - name : Playbook to upgrade logstash Nodes
   hosts: logstash
-  user: "{{user}}"
+  user: ubuntu 
   become: yes
   serial: 1
   gather_facts: True
@@ -22,7 +22,7 @@
       when: logstash_version is undefined or not logstash_version is match("\d+\.\d+\.\d+")
 
     - name: Get logstash current version
-      shell: dpkg -s logstash | grep -i version| cut -d ":" -f 2 | tr -d " "
+      shell: dpkg -s logstash| grep Version| cut -d ":" -f 3 | cut -d "-" -f 1 
       register: version_found
 
     - block:
@@ -53,13 +53,14 @@
         with_items:
           - { config_path: /etc/logstash, config_file: logstash.yml }
           - { config_path: /etc/logstash, config_file: pipelines.yml }
-          - { config_path: /etc/logstash/pipeline, config_file: syslog.yml}
+          - { config_path: /etc/logstash, config_file: jvm.options }
+          - { config_path: /etc/logstash/conf.d, config_file: syslog.conf }
 
       - name: Install logstash-{{logstash_version}}
-        shell: cd "{{download_dir}}" && sudo dpkg -i logstash-{{logstash_version}}.deb
+        shell: cd "{{download_dir}}" && sudo dpkg --force-confold -i logstash-{{logstash_version}}.deb
 
       - name: Get logstash current version
-        shell: dpkg -s logstash | grep -i version| cut -d ":" -f 2 | tr -d " "
+        shell: dpkg -s logstash| grep Version| cut -d ":" -f 3 | cut -d "-" -f 1 
         register: new_version_found
 
       - name: Validate logstash Version

@@ -2,7 +2,7 @@
 
 - name : Playbook to upgrade Kibana Nodes
   hosts: kibana
-  user: "{{user}}"
+  user: ubuntu 
   become: yes
   serial: 1
   gather_facts: True

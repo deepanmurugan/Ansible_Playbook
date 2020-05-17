@@ -2,7 +2,7 @@
 #Upgrade others except data nodes: ansible-playbook -i "ip-address", --extra-vars "host=all user=ubuntu" upgrade_data_es.yml --tags "es-all-nodes"
 
 - name : Playbook to upgrade ES Nodes
-  hosts: es_remaining 
+  hosts: es_data
   user: ubuntu
   become: yes
   serial: 1
