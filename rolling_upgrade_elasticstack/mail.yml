@@ -1,0 +1,10 @@
+#ELK Stack upgrade
+
+- name:  logstash-upgrade
+  import_playbook: upgrade_logstash.yml
+
+- name:  elasticsearch-rolling-upgrade
+  import_playbook: upgrade_es.yml
+
+- name:  kibana-upgrade
+  import_playbook: upgrade_kibana.yml
