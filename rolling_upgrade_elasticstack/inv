@@ -1,19 +1,19 @@
 #Inventory file
 
-[Logstash]
+[logstash]
 172.31.45.46
 
-[ES_Data]
+[es_data]
 172.31.45.47
 172.31.45.48
 172.31.45.49
 172.31.45.50
 
-[ES_Remaining]
+[es_remaining]
 172.31.45.51
 172.31.45.52
 172.31.45.53 
 
-[Kibana]
+[kibana]
 172.31.45.54
 172.31.45.55
