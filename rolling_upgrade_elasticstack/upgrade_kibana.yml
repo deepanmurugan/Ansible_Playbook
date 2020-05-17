@@ -1,0 +1,99 @@
+#ansible-playbook -i "ip-address", --extra-vars "host=all user=ubuntu" upgrade_kibana.yml
+
+- name : Playbook to upgrade Kibana Nodes
+  hosts: "{{host}}"
+  user: "{{user}}"
+  become: yes
+  serial: 1
+  gather_facts: True
+
+  vars:
+    download_dir: /tmp
+    backup_dir: /tmp/backup
+    kibana_version: 6.8.9
+    kibana_port: 5601
+    protocol: https
+
+
+  tasks:
+    - name: Validate kibana Version
+      fail: msg="Invalid ELK Version"
+      when: kibana_version is undefined or not kibana_version is match("\d+\.\d+\.\d+")
+
+    - name: Get kibana current version
+      shell: dpkg -s kibana | grep -i version| cut -d ":" -f 2 | tr -d " "
+      register: version_found
+
+    - block:
+
+      - name: Pre-download kibana install packages
+        get_url:
+          url: "{{item}}"
+          dest: "{{download_dir}}"
+        when: version_found.stdout is version(kibana_version, '<')
+        with_items:
+          - "{{protocol}}://artifacts.elastic.co/downloads/kibana/kibana-{{kibana_version}}-amd64.deb"
+
+      - name: Stop kibana service
+        service:
+          name: kibana
+          state: stopped
+        delay: 10
+
+      - name: Create folder for backup
+        file:
+          path: "{{backup_dir}}"
+          state: directory
+          mode: 0775
+          recurse: yes
+
+      - name: Backup exisiting config files
+        shell: sudo cp "/etc/kibana/{{item}}" "{{backup_dir}}/{{item}}"
+        with_items:
+          - kibana.yml
+
+      - name: List all plugins on the kibana node
+        shell: sudo /usr/share/kibana/bin/kibana-plugin list| grep -v JAVA | cut -f 1 | awk 'NF'
+        register: plugins_available
+
+      - name: Remove all available plugins
+        shell: sudo /usr/share/kibana/bin/kibana-plugin remove "{{item}}"
+        with_items:
+          - "{{plugins_available.stdout_lines}}"
+
+      - name: Make sure all plugins are removed correctly
+        shell: sudo /usr/share/kibana/bin/kibana-plugin list | awk 'NF' | grep -v JAVA | wc -l
+        register: plugin_count
+
+      - name: Install kibana-{{kibana_version}}
+        shell: cd "{{download_dir}}" && sudo dpkg -i kibana-{{kibana_version}}-amd64.deb
+        when: plugin_count.stdout|int == 0
+
+      - name: Get kibana current version
+        shell: dpkg -s kibana | grep -i version| cut -d ":" -f 2 | tr -d " "
+        register: new_version_found
+
+      - name: Validate kibana Version
+        fail: msg="New Kibana version is not installed"
+        when: new_version_found.stdout != kibana_version
+
+      - name: Install all the plugins except x-pack
+        shell: yes|sudo /usr/share/kibana/bin/kibana-plugin install "{{item}}"
+        with_items:
+          - "{{plugins_available.stdout_lines}}"
+        when: item != "x-pack"
+
+      - name: Start kibana service
+        service:
+          name: kibana
+          state: started
+        delay: 10
+
+      - name: Wait for kibana service to come up
+        wait_for:
+          port: "{{kibana_port}}"
+          delay: 20
+
+      when:
+        - version_found.stdout|length > 0
+        - version_found.stdout is version_compare(kibana_version, '<') 

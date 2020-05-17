@@ -1,0 +1,267 @@
+#ansible-playbook -i "ip-address", --extra-vars "host=all user=ubuntu" upgrade_data_es.yml
+
+- name : Playbook to upgrade ES Nodes
+  hosts: "{{host}}"
+  user: "{{user}}"
+  become: yes
+  serial: 1
+  gather_facts: True
+
+  vars:
+    download_dir: /tmp
+    backup_dir: /tmp/backup
+    es_version: 6.8.9
+    es_http_port: 9200
+    es_transport_port: 9300
+    es_username: elastic
+    es_password: #elasticpassword
+    nodes_in_cluster: 1 #No of nodes in your cluster
+    es_disable_allocation:  '{ "persistent": { "cluster.routing.allocation.enable": "primaries" } }'
+    es_enable_allocation: '{ "persistent": { "cluster.routing.allocation.enable": null } }'
+    protocol: https
+
+  tasks:
+    - name: Validate elasticsearch Version
+      fail: msg="Invalid ELK Version"
+      when: es_version is undefined or not es_version is match("\d+\.\d+\.\d+")
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Get elasticsearch current version
+      shell: dpkg -s elasticsearch | grep -i version| cut -d ":" -f 2 | tr -d " "
+      register: version_found
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Pre-download elasticsearch install packages
+      get_url:
+        url: "{{item}}"
+        dest: "{{download_dir}}"
+      when: version_found.stdout is version_compare(es_version, '<')
+      with_items:
+        - "{{protocol}}://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{es_version}}.deb"
+        - "{{protocol}}://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{es_version}}.deb.sha512"
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Validate checksum of the package
+      shell: cd "{{download_dir}}" && shasum -a 512 -c elasticsearch-{{es_version}}.deb.sha512
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Make sure Elasticsearch service is started before using HTTP API calls
+      service:
+        name: elasticsearch
+        state: started
+      delay: 5
+      tags:
+        - es-data-nodes
+
+    - name: Wait for Elasticsearch service to come up
+      wait_for:
+        port: "{{es_transport_port}}"
+      tags:
+        - es-data-nodes
+
+    - name: Wait for Elasticsearch http to come up
+      wait_for:
+        port: "{{es_http_port}}"
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Disable allocation of primaries on ES Node
+      uri:
+        url: "{{protocol}}://{{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}:{{es_http_port}}/_cluster/settings"
+        user: "{{es_username}}"
+        password: "{{es_password}}"
+        method: PUT
+        body: "{{ es_disable_allocation }}"
+        body_format: json
+      register: response
+      until:
+        - "response.json.acknowledged == true"
+        - "response.status == 200"
+      retries: 5
+      delay: 5
+      tags:
+        - es-data-nodes
+
+    - name: Perform a synced flush
+      uri:
+        url: "{{protocol}}://{{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}:{{es_http_port}}/_flush/synced"
+        user: "{{es_username}}"
+        password: "{{es_password}}"
+        method: POST
+      register: response
+      until:
+        - "response.status == 200"
+        - "response.json._shards.failed == 0"
+      retries: 5
+      delay: 5
+      tags:
+        - es-data-nodes
+
+    - name: Stop Elasticsearch service
+      service:
+        name: elasticsearch
+        state: stopped
+      delay: 5
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Create folder for backup
+      file:
+        path: "{{backup_dir}}"
+        state: directory
+        mode: 0775
+        recurse: yes
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Backup exisiting config files
+      shell: sudo cp "/etc/elasticsearch/{{item}}" "{{backup_dir}}/{{item}}"
+      with_items:
+        - elasticsearch.yml
+        - jvm.options
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: List all plugins on the elasticsearch node
+      shell: sudo /usr/share/elasticsearch/bin/elasticsearch-plugin list| grep -v JAVA | cut -f 1 | awk 'NF'
+      register: plugins_available
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - debug: msg="{{plugins_available}}"
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Remove all available plugins
+      shell: sudo /usr/share/elasticsearch/bin/elasticsearch-plugin remove "{{item}}"
+      with_items:
+        - "{{plugins_available.stdout_lines}}"
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Make sure all plugins are removed correctly
+      shell: sudo /usr/share/elasticsearch/bin/elasticsearch-plugin list | grep -v JAVA | wc -l
+      register: plugin_count
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Install Elasticsearch-{{es_version}}
+      shell: cd "{{download_dir}}" && sudo dpkg -i elasticsearch-{{es_version}}.deb
+      when: plugin_count.stdout|int == 0
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Get elasticsearch current version
+      shell: dpkg -s elasticsearch | grep -i version| cut -d ":" -f 2 | tr -d " "
+      register: new_version_found
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Validate elasticsearch Version
+      fail: msg="New Elasticsearch version is not installed"
+      when: new_version_found.stdout != es_version
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Install all the plugins except x-pack
+      shell: yes|sudo /usr/share/elasticsearch/bin/elasticsearch-plugin install "{{item}}"
+      with_items:
+        - "{{plugins_available.stdout_lines}}"
+      when: item != "x-pack"
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Start Elasticsearch service
+      service:
+        name: elasticsearch
+        state: started
+      delay: 5
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Wait for Elasticsearch service to come up
+      wait_for:
+        port: "{{es_transport_port}}"
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Wait for Elasticsearch http to come up
+      wait_for:
+        port: "{{es_http_port}}"
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Make sure node comes up
+      shell: "curl -s -k -m 2 '{{protocol}}://{{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}:9200/_cat/nodes?h=name' -u {{es_username}}:{{es_password}} | grep -E '^{{ansible_hostname}}$'"
+      register: result
+      until: result.rc == 0
+      retries: 10
+      delay: 10
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Make sure node joins the cluster
+      shell: "curl -s -k -m 2 '{{protocol}}://{{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}:9200/_cat/nodes?h=name' -u {{es_username}}:{{es_password}} | wc -l"
+      register: result
+      until: result.stdout|int == {{nodes_in_cluster}}
+      retries: 3
+      delay: 10
+      tags:
+        - es-all-nodes
+        - es-data-nodes
+
+    - name: Enable allocation of primaries on ES Node
+      uri:
+        url: "{{protocol}}://{{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}:{{es_http_port}}/_cluster/settings"
+        user: "{{es_username}}"
+        password: "{{es_password}}"
+        method: PUT
+        body: "{{ es_enable_allocation }}"
+        body_format: json
+      register: response
+      until:
+        - "response.json.acknowledged == true"
+        - "response.status == 200"
+      retries: 5
+      delay: 5
+      tags:
+        - es-data-nodes
+
+    - name: Wait for the cluster to become green before going to next node
+      uri:
+        url: "{{protocol}}://{{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}:{{es_http_port}}/_cluster/health"
+        user: "{{es_username}}"
+        password: "{{es_password}}"
+        method: GET
+      register: response
+      until:
+        - "response.json.relocating_shards == 0"
+        - "response.json.status == 'green'"
+      retries: 50
+      delay: 30
+      tags:
+        - es-data-nodes
