@@ -1,0 +1,82 @@
+#ansible-playbook -i "ip-address", --extra-vars "host=all user=ubuntu" upgrade_logstash.yml
+
+- name : Playbook to upgrade logstash Nodes
+  hosts: "{{host}}"
+  user: "{{user}}"
+  become: yes
+  serial: 1
+  gather_facts: True
+
+  vars:
+    download_dir: /tmp
+    backup_dir: /tmp/backup
+    logstash_version: 6.8.9
+    logstash_port: 9600
+    protocol: https
+
+
+  tasks:
+
+    - name: Validate logstash Version
+      fail: msg="Invalid ELK Version"
+      when: logstash_version is undefined or not logstash_version is match("\d+\.\d+\.\d+")
+
+    - name: Get logstash current version
+      shell: dpkg -s logstash | grep -i version| cut -d ":" -f 2 | tr -d " "
+      register: version_found
+
+    - block:
+
+      - name: Pre-download logstash install packages
+        get_url:
+          url: "{{item}}"
+          dest: "{{download_dir}}"
+        when: version_found.stdout is version(logstash_version, '<')
+        with_items:
+          - "{{protocol}}://artifacts.elastic.co/downloads/logstash/logstash-{{logstash_version}}.deb"
+
+      - name: Stop logstash service
+        service:
+          name: logstash
+          state: stopped
+        delay: 10
+
+      - name: Create folder for backup
+        file:
+          path: "{{backup_dir}}"
+          state: directory
+          mode: 0775
+          recurse: yes
+
+      - name: Backup exisiting config/important files
+        shell: sudo cp -r "{{item.config_path}}/{{item.config_file}}" "{{backup_dir}}/{{item.config_file}}"
+        with_items:
+          - { config_path: /etc/logstash, config_file: logstash.yml }
+          - { config_path: /etc/logstash, config_file: pipelines.yml }
+          - { config_path: /etc/logstash/pipeline, config_file: syslog.yml}
+
+      - name: Install logstash-{{logstash_version}}
+        shell: cd "{{download_dir}}" && sudo dpkg -i logstash-{{logstash_version}}.deb
+
+      - name: Get logstash current version
+        shell: dpkg -s logstash | grep -i version| cut -d ":" -f 2 | tr -d " "
+        register: new_version_found
+
+      - name: Validate logstash Version
+        fail: msg="New logstash version is not installed"
+        when: new_version_found.stdout != logstash_version
+
+      - name: Start logstash service
+        service:
+          name: logstash
+          state: started
+        delay: 10
+
+      - name: Wait for logstash service to come up
+        wait_for:
+          port: "{{logstash_port}}"
+          delay: 20
+
+      when:
+        - version_found.stdout|length > 0
+        - version_found.stdout|int < logstash_version
