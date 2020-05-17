@@ -7,7 +7,7 @@
   import_playbook: upgrade_es.yml node_type="others"
 
 - name:  elasticsearch-rolling-upgrade on data nodes
-  import_playbook: upgrade_es_data.yml node_type="data_node"
+  import_playbook: upgrade_es.yml node_type="data_node"
 
 - name:  kibana-upgrade
   import_playbook: upgrade_kibana.yml
