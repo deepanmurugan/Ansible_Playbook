@@ -1,8 +1,8 @@
-#Rolling upgrade of ELK stack
+# Rolling upgrade of ELK stack
 
 ansible-playbook -i inv main.yml
 
-Steps in Upgrading Logstash: upgrade_logstash.yml
+### Steps in Upgrading Logstash: upgrade_logstash.yml
 ```
 1. Pre download the deb package
 2. Make sure logstash version is installed in the node and the version installed is less than the one you are trying to install
@@ -14,7 +14,8 @@ Steps in Upgrading Logstash: upgrade_logstash.yml
 8. Wait for logstash to come up
 9. Go for the next node
 ```
-Steps in Upgrading Elasticsearch: upgrade_es.yml
+
+### Steps in Upgrading Elasticsearch: upgrade_es.yml
 ```
 1. Pre download the deb package
 2. Make sure ES version is installed in the node and the version installed is less than the one you are trying to install
@@ -32,7 +33,8 @@ Steps in Upgrading Elasticsearch: upgrade_es.yml
 14. Enable allocation of primaries on ES Node
 15. Wait for the cluster to become green before going to next node
 ```
-Steps in Upgrading Kibana: upgrade_kibana.yml
+
+### Steps in Upgrading Kibana: upgrade_kibana.yml
 ```
 1. Backup all the saved objected in the Kibana UI. (Optional and needed only if you want to migrate any saved objects in        kibana).
    Login to Kibana UI
