@@ -1,0 +1,97 @@
+- name : Expand EBS Root Volume
+  hosts: "{{host}}"
+  user: ubuntu
+  gather_facts: True
+
+  vars:
+    expected_volume: "21"
+
+
+  tasks:
+    - ec2_metadata_facts:
+
+    - name: Get root volume for the instance
+      shell: "aws ec2 describe-instances --filters Name=instance-id,Values={{ansible_ec2_instance_id}} --query Reservations[].Instances[].RootDeviceName --region {{ansible_ec2_placement_region}} --output text"
+      register: root_device
+      delegate_to: localhost
+
+    - name: Get volume id for the instance
+      command: "aws ec2 describe-volumes --region {{ansible_ec2_placement_region}} --filters Name=attachment.instance-id,Values={{ansible_ec2_instance_id}} --query 'Volumes[*].VolumeId' --output text"
+      register: volumeid
+      delegate_to: localhost
+
+    - name: Get volume size for the instance
+      command: "aws ec2 describe-volumes --region {{ansible_ec2_placement_region}} --filters Name=attachment.instance-id,Values={{ansible_ec2_instance_id}} --query 'Volumes[*].Size' --output text"
+      register: volumesize
+      delegate_to: localhost
+
+    - debug:
+        msg: "Volumeid: {{ volumeid.stdout_lines }}"
+
+    - debug:
+        msg: "Volume Size: {{ volumesize.stdout|int }}"
+
+    - name: Find volume to expand
+      set_fact:
+        expand_volume: "{{ expected_volume|int - volumesize.stdout|int }}"
+
+    - block:
+      - shell: "aws ec2 modify-volume --size {{expected_volume|int}} --volume-id {{volumeid.stdout}} --region={{ansible_ec2_placement_region}}"
+        register: volume_update_result
+        delegate_to: localhost
+
+      - debug:
+          msg: "Volume expansion response: {{ volume_update_result }}"
+
+      - name: Recheck if volume is expanded or not
+        command: "aws ec2 describe-volumes --region {{ansible_ec2_placement_region}} --filters Name=attachment.instance-id,Values={{ansible_ec2_instance_id}} --query 'Volumes[*].Size' --output text"
+        when:
+          - volume_update_result.failed == False
+        register: newvolumesize
+        until:
+          - newvolumesize.stdout == expected_volume
+        retries: 10
+        delay: 5
+        delegate_to: localhost
+
+      - name: Get block device
+        shell: "lsblk -r| grep -w /| awk '{print $1}'"
+        when:
+          - newvolumesize.stdout == expected_volume
+        register: sblock_device
+
+      - name: Expand block device only for xvda
+        shell: "sudo growpart /dev/xvda 1"
+        register: xvda_growpart_out
+        when: (sblock_device.stdout == "xvda1")
+
+      - name: Expand block device only for nvme0n1
+        shell: "sudo growpart /dev/nvme0n1 1"
+        register: nvme_growpart_out
+        when: (sblock_device.stdout == "nvme0n1p1")
+        ignore_errors: True
+
+      - name: Resize block device for xvda
+        shell: "sudo resize2fs /dev/{{sblock_device.stdout}}"
+        when:
+          - sblock_device.stdout == "xvda1"
+          - xvda_growpart_out.stdout | search('CHANGED')
+        register: xvda_resize_out
+
+      - name: Resize block device for nvme
+        shell: "sudo resize2fs /dev/{{sblock_device.stdout}}"
+        when:
+          - sblock_device.stdout == "nvme0n1p1"
+          - nvme_growpart_out.stdout | search('CHANGED')
+        register: nvme_resize_out
+
+      - name: Get the new modified root volume
+        shell: "df -h|grep -w /"
+        register: modified_root
+
+      - debug:
+          msg: "New root volume: {{ modified_root.stdout }}"
+
+      when:
+        - "{{ expand_volume|int }} > 0"
+        - root_device.stdout == '/dev/sda1'
