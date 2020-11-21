@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: shopping-app-service-2
-        image: "{{ image_id_service2 }}"
+        image: "{{ image_id }}"
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
