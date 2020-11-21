@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: shopping-app
+  name: shopping-app-deloyment-service1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shopping-app
+  template:
+    metadata:
+      labels:
+        app: shopping-app
+    spec:
+      containers:
+      - name: shopping-app-service-1
+        image: "{{ image_id_service1 }}"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+      imagePullSecrets:
+        - name: dockerhubsecret
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: shopping-app
+  name: shopping-app-deloyment-service2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shopping-app
+  template:
+    metadata:
+      labels:
+        app: shopping-app
+    spec:
+      containers:
+      - name: shopping-app-service-2
+        image: "{{ image_id_service2 }}"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+      imagePullSecrets:
+        - name: dockerhubsecret
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
