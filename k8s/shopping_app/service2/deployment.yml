@@ -9,12 +9,12 @@ spec:
   selector:
     matchLabels:
       app: shopping-app
-      service: service2
+      task: service2
   template:
     metadata:
       labels:
         app: shopping-app
-        service: service2
+        task: service2
     spec:
       containers:
       - name: shopping-app-service-2
