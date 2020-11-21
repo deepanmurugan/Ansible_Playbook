@@ -12,13 +12,13 @@ spec:
       paths:
       - path: /home
         backend:
-          serviceName: shoppingapp-home
+          serviceName: shoppingapp-home-service
           servicePort: http
       - path: /kids
         backend:
-          serviceName: shoppingapp-kids
+          serviceName: shoppingapp-kids-service
           servicePort: http
       - path: /mens
         backend:
-          serviceName: shoppingapp-mens
+          serviceName: shoppingapp-mens-service
           servicePort: http
