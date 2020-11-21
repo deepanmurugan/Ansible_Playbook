@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: shopping-app-service1
+  name: shoppingapp-home-service
 spec:
   selector:
-    app: shopping-app
-    task: service1
+    app: shoppingapp
+    task: shoppingapp-home
   ports:
     - protocol: TCP
       port: 80

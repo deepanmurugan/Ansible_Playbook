@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: shoppingapp
+  name: shoppingapp-mens-deloyment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shoppingapp
+      task: shoppingapp-mens
+  template:
+    metadata:
+      labels:
+        app: shoppingapp
+        task: shoppingapp-mens
+    spec:
+      containers:
+      - name: shoppingapp-mens-pod
+        image: "{{ image_id }}"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+      imagePullSecrets:
+        - name: dockerhubsecret
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0

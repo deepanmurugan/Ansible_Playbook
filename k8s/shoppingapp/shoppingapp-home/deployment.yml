@@ -2,22 +2,22 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: shopping-app
-  name: shopping-app-deloyment-service1
+    app: shoppingapp
+  name: shoppingapp-home-deloyment
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: shopping-app
-      task: service1
+      app: shoppingapp
+      task: shoppingapp-home
   template:
     metadata:
       labels:
-        app: shopping-app
-        task: service1
+        app: shoppingapp
+        task: shoppingapp-home
     spec:
       containers:
-      - name: shopping-app-service-1
+      - name: shoppingapp-home-pod
         image: "{{ image_id }}"
         imagePullPolicy: Always
         ports:
