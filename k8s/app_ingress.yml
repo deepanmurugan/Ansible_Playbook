@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: shoppingapp-ingress
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.frontend.rule.type: PathPrefixStrip
+spec:
+  rules:
+  - host: app.shoppingapp.com
+    http:
+      paths:
+      - path: /service1
+        backend:
+          serviceName: shopping-app-service1
+          servicePort: http
+      - path: /service2
+        backend:
+          serviceName: shopping-app-service2
+          servicePort: http
