@@ -10,11 +10,15 @@ spec:
   - host: app.shoppingapp.com
     http:
       paths:
-      - path: /service1
+      - path: /home
         backend:
-          serviceName: shopping-app-service1
+          serviceName: shoppingapp-home
           servicePort: http
-      - path: /service2
+      - path: /kids
         backend:
-          serviceName: shopping-app-service2
+          serviceName: shoppingapp-kids
+          servicePort: http
+      - path: /mens
+        backend:
+          serviceName: shoppingapp-mens
           servicePort: http
