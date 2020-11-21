@@ -13,3 +13,9 @@
       validate_certs: no
       namespace: default
       definition: "{{ lookup('template', 'deployment.yml') | from_yaml }}"
+  - name: Deploy the Ingress
+    k8s:
+      state: present
+      validate_certs: no
+      namespace: default
+      definition: "{{ lookup('template', 'ingress.yml') | from_yaml }}"
