@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: shoppingapp-home-service
+  name: {{ service_name }}-service
 spec:
   selector:
-    app: shoppingapp
-    task: shoppingapp-home
+    app: "{{ app_name }}"
+    task: "{{ service_name }}"
   ports:
     - protocol: TCP
       port: 80
