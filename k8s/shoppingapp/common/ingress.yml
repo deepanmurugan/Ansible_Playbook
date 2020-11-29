@@ -22,3 +22,7 @@ spec:
         backend:
           serviceName: shoppingapp-mens-service
           servicePort: http
+      - path: /ladies
+        backend:
+          serviceName: shoppingapp-ladies-service
+          servicePort: http
